@@ -1,27 +1,28 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
 name: Python application
 
 on:
   push:
+    
 
 permissions:
   contents: read
   packages: write
 
 jobs:
-  build-and-deploy:
+  build:
+
     runs-on: ubuntu-latest
 
     steps:
-    # 1️⃣ Clonar el repo
     - uses: actions/checkout@v4
-
-    # 2️⃣ Configurar Python
-    - name: Set up Python 3.11
+    - name: Set up Python 3.10
       uses: actions/setup-python@v3
       with:
         python-version: "3.11"
 
-    # 3️⃣ Login a GHCR
     - name: 🔐 Login to GitHub Container Registry
       uses: docker/login-action@v3
       with:
@@ -29,37 +30,28 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    # 4️⃣ Construir y subir Docker
     - name: 🏗️ Build and push Docker image
       uses: docker/build-push-action@v6
       with:
         push: true
-        tags: ghcr.io/cristianredin/taller_finaldevops:1.0.0,ghcr.io/cristianredin/taller_finaldevops:latest
+        tags: ghcr.io/byronmoreno/finalquintoa:1.0.0
 
-    # 5️⃣ Verificar secretos (opcional)
-    - name: 🧾 Mostrar variables básicas
+    - name: 🧾 Mostrar variables básicas (solo locales, no secretos)
       run: |
         echo "Probando conexión SSH con:"
         echo "Host: ${{ secrets.VPS_HOST }}"
         echo "Usuario: ${{ secrets.VPS_USER }}"
         echo "Puerto: ${{ secrets.VPS_SSH_PORT }}"
-      shell: bash
-
-    # 6️⃣ Conexión y deploy vía SSH con clave privada
-    - name: 🧪 Conexión SSH y deploy
+        echo "Password: ${{ secrets.VPS_PASSWORD }}"
+    - name: 🧪 Probar conexión SSH
       uses: appleboy/ssh-action@v1
       with:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USER }}
-        key: ${{ secrets.VPS_SSH_KEY }}   # clave privada guardada como secreto
-        port: ${{ secrets.VPS_SSH_PORT || 22 }}
+        password: ${{ secrets.VPS_PASSWORD }}
+        port: ${{ secrets.VPS_SSH_PORT }}
         script: |
           echo "✅ Conexión exitosa desde GitHub Actions"
           hostname
           whoami
           uptime
-          # Aquí puedes agregar tus comandos de despliegue, por ejemplo:
-          # docker pull ghcr.io/cristianredin/taller_finaldevops:latest
-          # docker stop mi_contenedor || true
-          # docker rm mi_contenedor || true
-          # docker run -d --name mi_contenedor -p 80:5000 ghcr.io/cristianredin/taller_finaldevops:latest
