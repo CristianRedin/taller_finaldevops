@@ -5,7 +5,7 @@ name: Python application
 
 on:
   push:
-    
+    branches: "quintoa"
 
 permissions:
   contents: read
@@ -34,7 +34,7 @@ jobs:
       uses: docker/build-push-action@v6
       with:
         push: true
-        tags: ghcr.io/byronmoreno/finalquintoa:1.0.0
+        tags: ghcr.io/cristianredin/taller_finaldevops:1.0.0,ghcr.io/cristianredin/taller_finaldevops:latest
 
     - name: 🧾 Mostrar variables básicas (solo locales, no secretos)
       run: |
