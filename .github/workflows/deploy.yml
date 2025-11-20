@@ -36,24 +36,17 @@ jobs:
           ghcr.io/cristianredin/taller_finaldevops:1.0.0
           ghcr.io/cristianredin/taller_finaldevops:latest
 
-    - name: 🧾 Mostrar datos (solo para debug, NO imprime secretos)
-      run: |
-        echo "Host: ${{ secrets.VPS_HOST }}"
-        echo "Usuario: ${{ secrets.VPS_USER }}"
-        echo "Puerto: ${{ secrets.VPS_SSH_PORT }}"
-
-    - name: 🧪 Probar conexión SSH
+    # Paso previo para asegurar que la carpeta existe antes de copiar
+    - name: 📂 Crear directorio en VPS
       uses: appleboy/ssh-action@v1
       with:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USER }}
         password: ${{ secrets.VPS_PASSWORD }}
         port: ${{ secrets.VPS_SSH_PORT }}
+        timeout: 30s
         script: |
-          echo "Conectado correctamente ✔️"
-          whoami
-          hostname
-          uptime
+          mkdir -p /home/${{ secrets.VPS_USER }}/despliegue
 
     - name: 📤 Copiar stack.yml al servidor
       uses: appleboy/scp-action@v1
@@ -64,6 +57,7 @@ jobs:
         port: ${{ secrets.VPS_SSH_PORT }}
         source: "stack.yml"
         target: "/home/${{ secrets.VPS_USER }}/despliegue"
+        timeout: 30s
 
     - name: 🚀 Despliegue en el servidor
       uses: appleboy/ssh-action@v1
@@ -72,17 +66,25 @@ jobs:
         username: ${{ secrets.VPS_USER }}
         password: ${{ secrets.VPS_PASSWORD }}
         port: ${{ secrets.VPS_SSH_PORT }}
+        timeout: 30s
+        command_timeout: 30m
         script: |
           echo "👉 Iniciando despliegue..."
-
           cd /home/${{ secrets.VPS_USER }}/despliegue
 
-          echo "🧹 Eliminando stack previo (si existe)"
+          echo "🧹 Limpiando stack previo (si existe)"
+          # El '|| true' evita que falle si el stack no existe aun
           docker stack rm cristhian || true
-          sleep 10
+          
+          # Esperamos unos segundos para asegurar que docker libere los puertos
+          sleep 15
 
-          echo "🔐 Login al GHCR"
+          echo "🔐 Login al GHCR dentro del VPS"
+          # Asegúrate de que GHCR_PAT tenga permisos de 'read:packages'
           echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u cristianredin --password-stdin
+
+          echo "⬇️ Actualizando imagen (pull)"
+          docker pull ghcr.io/cristianredin/taller_finaldevops:latest
 
           echo "🚀 Desplegando nuevo stack"
           docker stack deploy -c stack.yml --with-registry-auth cristhian
