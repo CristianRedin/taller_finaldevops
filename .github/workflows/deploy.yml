@@ -36,7 +36,17 @@ jobs:
           ghcr.io/cristianredin/taller_finaldevops:1.0.0
           ghcr.io/cristianredin/taller_finaldevops:latest
 
-    # Paso previo para asegurar que la carpeta existe antes de copiar
+    # --- PASO DE DIAGNÓSTICO ---
+    # Esto verificará si GitHub puede ver tu servidor antes de intentar conectar por SSH.
+    - name: 🕵️ Diagnóstico de Red (Verificar Puerto)
+      timeout-minutes: 2
+      run: |
+        echo "Probando conexión al Host: ${{ secrets.VPS_HOST }} en el puerto ${{ secrets.VPS_SSH_PORT }}..."
+        # Instalamos netcat para probar el puerto
+        sudo apt-get update && sudo apt-get install -y netcat
+        # El comando 'nc -zv' nos dirá si el puerto está abierto o bloqueado
+        nc -zv ${{ secrets.VPS_HOST }} ${{ secrets.VPS_SSH_PORT }} || echo "⚠️ ADVERTENCIA: El puerto parece estar CERRADO o BLOQUEADO por un Firewall."
+
     - name: 📂 Crear directorio en VPS
       uses: appleboy/ssh-action@v1
       with:
@@ -73,14 +83,13 @@ jobs:
           cd /home/${{ secrets.VPS_USER }}/despliegue
 
           echo "🧹 Limpiando stack previo (si existe)"
-          # El '|| true' evita que falle si el stack no existe aun
+          # El '|| true' evita que falle si el stack no existe aún
           docker stack rm cristhian || true
           
           # Esperamos unos segundos para asegurar que docker libere los puertos
           sleep 15
 
           echo "🔐 Login al GHCR dentro del VPS"
-          # Asegúrate de que GHCR_PAT tenga permisos de 'read:packages'
           echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u cristianredin --password-stdin
 
           echo "⬇️ Actualizando imagen (pull)"
