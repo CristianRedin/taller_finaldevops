@@ -1,8 +1,8 @@
 version: '3.9'
 
 services:
-  moreno:
-    image: 
+  redin:
+    image: ghcr.io/CristianRedin/taller_finaldevops:1.0.0  # Asegúrate de usar tu imagen correcta
     deploy:
       replicas: 1
       resources:
@@ -11,19 +11,19 @@ services:
           memory: 512M
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.moreno.entrypoints=http"
-        - "traefik.http.routers.moreno.rule=Host(`moreno.byronrm.com`)"
-        - "traefik.http.middlewares.moreno-https-redirect.redirectscheme.scheme=https"
-        - "traefik.http.routers.moreno.middlewares=moreno-https-redirect"
-        - "traefik.http.routers.moreno-secure.entrypoints=https"
-        - "traefik.http.routers.moreno-secure.rule=Host(`moreno.byronrm.com`)"
-        - "traefik.http.routers.moreno-secure.tls=true"
-        - "traefik.http.routers.moreno-secure.tls.certresolver=http"
-        - "traefik.http.routers.moreno-secure.service=moreno"
-        - "traefik.http.services.moreno.loadbalancer.server.port=5000"
+        - "traefik.http.routers.redin.entrypoints=http"
+        - "traefik.http.routers.redin.rule=Host(`redin.byronrm.com`)"
+        - "traefik.http.middlewares.redin-https-redirect.redirectscheme.scheme=https"
+        - "traefik.http.routers.redin.middlewares=redin-https-redirect"
+        - "traefik.http.routers.redin-secure.entrypoints=https"
+        - "traefik.http.routers.redin-secure.rule=Host(`redin.byronrm.com`)"
+        - "traefik.http.routers.redin-secure.tls=true"
+        - "traefik.http.routers.redin-secure.tls.certresolver=http"
+        - "traefik.http.routers.redin-secure.service=redin"
+        - "traefik.http.services.redin.loadbalancer.server.port=5000"
         - "traefik.docker.network=traefik-public"
-      networks:
-        - traefik-public
+    networks:
+      - traefik-public
 
 networks:
   traefik-public:
