@@ -31,7 +31,7 @@ jobs:
       uses: docker/build-push-action@v6
       with:
         push: true
-        tags: ghcr.io/CristianRedin/taller_finaldevops:1.0.0  # Actualicé la imagen aquí
+        tags: ghcr.io/CristianRedin/taller_finaldevops:1.0.0  # Usando la imagen correcta
 
     - name: 🧾 Mostrar variables básicas (solo locales, no secretos)
       run: |
@@ -77,9 +77,8 @@ jobs:
           # Borrar el stack SIEMPRE (si no existe no falla)
           docker stack rm cristhian || true
 
-          #echo "==> descargando la imagen del GHCR"
+          # Login al GHCR usando el token CR_PAT (asegúrate que el token esté en los secretos de GitHub)
           echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u cristianredin --password-stdin
-          docker pull ghcr.io/CristianRedin/taller_finaldevops:1.0.0
 
-          #echo "==> Desplegando stack..."
-          #docker stack deploy -c stack.yml --with-registry-auth cristhian
+          # Desplegar stack con la imagen directamente desde GHCR
+          docker stack deploy -c stack.yml --with-registry-auth cristhian
