@@ -36,19 +36,6 @@ jobs:
           ghcr.io/cristianredin/taller_finaldevops:1.0.0
           ghcr.io/cristianredin/taller_finaldevops:latest
 
-    # --- PASO DE DIAGNÓSTICO CORREGIDO ---
-    - name: 🕵️ Diagnóstico de Red (Verificar Puerto)
-      timeout-minutes: 2
-      run: |
-        echo "Probando conexión al Host: ${{ secrets.VPS_HOST }} en el puerto ${{ secrets.VPS_SSH_PORT }}..."
-        
-        # CORRECCIÓN AQUÍ: Usamos el nombre específico del paquete
-        sudo apt-get update && sudo apt-get install -y netcat-openbsd
-        
-        # El comando 'nc -zv' nos dirá si el puerto está abierto
-        # Si falla (exit code 1), imprimirá el mensaje de advertencia
-        nc -zv ${{ secrets.VPS_HOST }} ${{ secrets.VPS_SSH_PORT }} || echo "⚠️ ADVERTENCIA CRÍTICA: El puerto ${{ secrets.VPS_SSH_PORT }} está CERRADO o BLOQUEADO por un Firewall."
-
     - name: 📂 Crear directorio en VPS
       uses: appleboy/ssh-action@v1
       with:
@@ -86,13 +73,12 @@ jobs:
 
           echo "🧹 Limpiando stack previo (si existe)"
           docker stack rm cristhian || true
-          
           sleep 15
 
           echo "🔐 Login al GHCR dentro del VPS"
           echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u cristianredin --password-stdin
 
-          echo "⬇️ Actualizando imagen (pull)"
+          echo "⬇️ Actualizando imagen"
           docker pull ghcr.io/cristianredin/taller_finaldevops:latest
 
           echo "🚀 Desplegando nuevo stack"
