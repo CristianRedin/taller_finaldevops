@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   redin:
-    image: ghcr.io/CristianRedin/taller_finaldevops:1.0.0  # Asegúrate de usar tu imagen correcta
+    image: docker pull ghcr.io/CristianRedin/taller_finaldevops:1.0.0-latest  # Asegúrate de usar tu imagen correcta
     deploy:
       replicas: 1
       resources:

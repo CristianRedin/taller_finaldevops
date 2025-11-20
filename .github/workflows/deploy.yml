@@ -31,7 +31,7 @@ jobs:
       uses: docker/build-push-action@v6
       with:
         push: true
-        tags: ghcr.io/CristianRedin/taller_finaldevops:1.0.0  # Usando la imagen correcta
+        tags: docker pull ghcr.io/CristianRedin/taller_finaldevops:1.0.0-latest  # Usando la imagen correcta
 
     - name: 🧾 Mostrar variables básicas (solo locales, no secretos)
       run: |
