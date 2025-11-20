@@ -82,7 +82,7 @@ jobs:
           sleep 10
 
           echo "🔐 Login al GHCR"
-          echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u cristianredin --password-stdin
+          echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u cristianredin --password-stdin
 
           echo "🚀 Desplegando nuevo stack"
           docker stack deploy -c stack.yml --with-registry-auth cristhian
